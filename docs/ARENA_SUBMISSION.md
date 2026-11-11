@@ -48,6 +48,7 @@ EVM and Solana wallets.
 
 - Live app: `https://rome-comitia.vercel.app`
 - Source repository: `https://github.com/hoasine/rome-comitia`
-- Contract: `ADD_CONTRACT_ADDRESS`
-- Verified source: `ADD_VERIFIED_URL`
+- Contract: `0xb130ff1bbd6c928c0ce6daf5c31dec371c372fad`
+- Via Explorer: `https://via-hadrian.testnet.romeprotocol.xyz/address/0xb130ff1bbd6c928c0ce6daf5c31dec371c372fad`
+- Verified source: `https://verify.testnet.romeprotocol.xyz/repo-ui/200010/0xb130ff1bbd6c928c0ce6daf5c31dec371c372fad`
 - Demo video: `ADD_VIDEO_URL`

@@ -4,6 +4,11 @@ Comitia runs on-chain polls that EVM and Solana wallets vote in together on Rome
 
 ![CI](https://github.com/hoasine/rome-comitia/actions/workflows/check.yml/badge.svg)
 
+## Live deployment
+
+- App: https://rome-comitia.vercel.app
+- Comitia contract: `0xb130ff1bbd6c928c0ce6daf5c31dec371c372fad` ([explorer](https://via-hadrian.testnet.romeprotocol.xyz/address/0xb130ff1bbd6c928c0ce6daf5c31dec371c372fad), [verified source](https://verify.testnet.romeprotocol.xyz/repo-ui/200010/0xb130ff1bbd6c928c0ce6daf5c31dec371c372fad))
+
 ## Why it needs Rome
 
 Rome gives each Solana wallet a synthetic EVM address, `keccak256(pubkey)[12:]`, and lets it call Solidity contracts by signing with Solflare. Comitia uses that in two ways:
