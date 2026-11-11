@@ -28,13 +28,20 @@ export default defineConfig({
       url: "https://hadrian.testnet.romeprotocol.xyz/",
       accounts: deploymentAccounts,
     },
+    rubicon: {
+      type: "http",
+      chainType: "l1",
+      chainId: 7531,
+      url: "https://rubicon.mainnet.romeprotocol.xyz/",
+      accounts: deploymentAccounts,
+    },
   },
   verify: {
     etherscan: { enabled: false },
     blockscout: { enabled: false },
     sourcify: {
       enabled: true,
-      apiUrl: "https://verify.testnet.romeprotocol.xyz",
+      apiUrl: process.env.SOURCIFY_URL ?? "https://verify.testnet.romeprotocol.xyz",
     },
   },
 });

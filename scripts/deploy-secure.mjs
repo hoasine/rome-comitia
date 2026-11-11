@@ -46,10 +46,19 @@ function readSecret(prompt) {
 }
 
 const script = process.argv[2] ?? "scripts/deploy.ts";
+const network = process.argv[3] ?? "hadrian";
 const isDeployment = script === "scripts/deploy.ts";
+const isMainnet = network === "rubicon";
+const sourcify = isMainnet
+  ? "https://verify.mainnet.romeprotocol.xyz"
+  : "https://verify.testnet.romeprotocol.xyz";
 
-console.log(isDeployment ? "Comitia Hadrian deployment" : `Comitia Hadrian: ${script}`);
-console.log("Paste the private key for your funded TEST wallet. Input is hidden.");
+console.log(isDeployment ? `Comitia ${network} deployment` : `Comitia ${network}: ${script}`);
+console.log(
+  isMainnet
+    ? "Rubicon is MAINNET: gas is real USDC. Paste the private key of the funded deployer. Input is hidden."
+    : "Paste the private key for your funded TEST wallet. Input is hidden.",
+);
 
 let privateKey;
 try {
@@ -63,7 +72,7 @@ try {
   );
   const result = spawnSync(
     process.execPath,
-    [hardhatCli, "run", script, "--network", "hadrian"],
+    [hardhatCli, "run", script, "--network", network],
     {
       cwd: process.cwd(),
       env: { ...process.env, PRIVATE_KEY: privateKey },
@@ -75,23 +84,21 @@ try {
   if (result.status !== 0) {
     process.exitCode = result.status ?? 1;
   } else if (isDeployment) {
-    const deployment = JSON.parse(readFileSync("deployments/hadrian.json", "utf8"));
+    const deployment = JSON.parse(readFileSync(`deployments/${network}.json`, "utf8"));
     console.log("\nVerifying Comitia on Sourcify…");
     const verify = spawnSync(
       process.execPath,
-      [
-        hardhatCli,
-        "--network",
-        "hadrian",
-        "verify",
-        deployment.comitia,
-      ],
-      { cwd: process.cwd(), env: process.env, stdio: "inherit" },
+      [hardhatCli, "--network", network, "verify", deployment.comitia],
+      {
+        cwd: process.cwd(),
+        env: { ...process.env, SOURCIFY_URL: sourcify },
+        stdio: "inherit",
+      },
     );
     if (verify.status !== 0) {
       console.log("Verification can be retried without a private key:");
       console.log(
-        `npx hardhat verify --network hadrian ${deployment.comitia}`,
+        `$env:SOURCIFY_URL="${sourcify}"; npx hardhat verify --network ${network} ${deployment.comitia}`,
       );
     }
   }
