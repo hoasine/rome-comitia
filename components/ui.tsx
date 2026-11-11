@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleAlert, LoaderCircle, Sparkles, Wallet, X } from "lucide-react";
+import { CircleAlert, LoaderCircle, LogOut, Sparkles, Wallet, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -66,14 +66,25 @@ export function SiteHeader() {
         </nav>
         <div className="wallet-cluster">
           {wallet.evmAddress ? (
-            <button
-              className={`button button-small button-evm ${wallet.activeLane === "evm" ? "active" : ""}`}
-              onClick={() => wallet.selectLane("evm")}
-              aria-label={`Use MetaMask address ${wallet.evmAddress}`}
-              title={wallet.evmAddress}
-            >
-              <Wallet size={14} /> <span>{shortAddress(wallet.evmAddress)}</span>
-            </button>
+            <span className="wallet-chip">
+              <button
+                className={`button button-small button-evm ${wallet.activeLane === "evm" ? "active" : ""}`}
+                onClick={() => wallet.selectLane("evm")}
+                aria-label={`Use MetaMask address ${wallet.evmAddress}`}
+                title={wallet.evmAddress}
+              >
+                <Wallet size={14} /> <span>{shortAddress(wallet.evmAddress)}</span>
+              </button>
+              <button
+                className="button button-small wallet-disconnect"
+                onClick={wallet.disconnectEvm}
+                disabled={wallet.isBusy}
+                aria-label="Disconnect MetaMask"
+                title="Disconnect MetaMask"
+              >
+                <LogOut size={13} />
+              </button>
+            </span>
           ) : (
             <button
               className="button button-small"
@@ -85,14 +96,25 @@ export function SiteHeader() {
             </button>
           )}
           {wallet.syntheticAddress ? (
-            <button
-              className={`button button-small button-solana ${wallet.activeLane === "solana" ? "active" : ""}`}
-              onClick={() => wallet.selectLane("solana")}
-              aria-label={`Use Solflare synthetic address ${wallet.syntheticAddress}`}
-              title={`Solana ${wallet.solanaAddress}`}
-            >
-              <Sparkles size={14} /> <span>{shortAddress(wallet.solanaAddress ?? "", 4)}</span>
-            </button>
+            <span className="wallet-chip">
+              <button
+                className={`button button-small button-solana ${wallet.activeLane === "solana" ? "active" : ""}`}
+                onClick={() => wallet.selectLane("solana")}
+                aria-label={`Use Solflare synthetic address ${wallet.syntheticAddress}`}
+                title={`Solana ${wallet.solanaAddress}`}
+              >
+                <Sparkles size={14} /> <span>{shortAddress(wallet.solanaAddress ?? "", 4)}</span>
+              </button>
+              <button
+                className="button button-small wallet-disconnect"
+                onClick={wallet.disconnectSolana}
+                disabled={wallet.isBusy}
+                aria-label="Disconnect Solflare"
+                title="Disconnect Solflare"
+              >
+                <LogOut size={13} />
+              </button>
+            </span>
           ) : (
             <button
               className="button button-small"

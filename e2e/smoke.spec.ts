@@ -11,6 +11,9 @@ async function installMockMetaMask(page: Page) {
           if (method === "eth_requestAccounts" || method === "eth_accounts") return [account];
           if (method === "eth_chainId") return "0x30d4a";
           if (method === "wallet_switchEthereumChain") return null;
+          if (method === "wallet_requestPermissions" || method === "wallet_revokePermissions") {
+            return null;
+          }
           throw new Error(`Unsupported mock method ${method}`);
         },
         on() {},
@@ -86,6 +89,20 @@ test("create poll validates input and stays read-only in preview", async ({ page
   await expect(dialog.getByRole("alert")).toContainText(/read-only/);
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
+});
+
+test("a connected MetaMask wallet can be disconnected and reconnected", async ({ page }) => {
+  await installMockMetaMask(page);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Connect MetaMask" }).click();
+  await expect(page.getByRole("button", { name: `Use MetaMask address ${mockEvmAccount}` })).toBeVisible();
+
+  await page.getByRole("button", { name: "Disconnect MetaMask" }).click();
+  await expect(page.getByRole("button", { name: "Connect MetaMask" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Disconnect MetaMask" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Connect MetaMask" }).click();
+  await expect(page.getByRole("button", { name: `Use MetaMask address ${mockEvmAccount}` })).toBeVisible();
 });
 
 test("responses carry security headers", async ({ request }) => {

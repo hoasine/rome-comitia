@@ -89,6 +89,8 @@ interface WalletContextValue {
   connectSolana(): Promise<void>;
   selectLane(lane: WalletLane): void;
   disconnect(): void;
+  disconnectEvm(): void;
+  disconnectSolana(): void;
   executeCall(data: Hex, target?: Address): Promise<void>;
   resetTransaction(): void;
 }
@@ -153,6 +155,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const provider = ethereumProvider();
     if (!provider) throw new Error("Install MetaMask or another EVM wallet to continue.");
 
+    try {
+      // Opens MetaMask's account picker even when the site is already connected.
+      await provider.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      });
+    } catch (error) {
+      if (typeof error === "object" && error && "code" in error && Number(error.code) === 4001) {
+        throw error;
+      }
+    }
     const accounts = (await provider.request({ method: "eth_requestAccounts" })) as string[];
     if (!accounts[0]) throw new Error("No EVM account was returned.");
     try {
@@ -294,17 +307,31 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setActiveLane("solana");
   }, []);
 
-  const disconnect = useCallback(() => {
+  const disconnectEvm = useCallback(() => {
+    void ethereumProvider()
+      ?.request({ method: "wallet_revokePermissions", params: [{ eth_accounts: {} }] })
+      .catch(() => undefined);
+    setEvmAddress(null);
+    setTransaction({ status: "idle" });
+    setActiveLane((lane) => (lane === "evm" ? null : lane));
+  }, []);
+
+  const disconnectSolana = useCallback(() => {
     stopSolanaEvents.current?.();
     stopSolanaEvents.current = null;
-    setEvmAddress(null);
     setSolanaAddress(null);
     setSyntheticAddress(null);
     setSolanaSigner(null);
     setSignLegacyTransaction(null);
     setSolanaSupportsV1(false);
-    setActiveLane(null);
+    setTransaction({ status: "idle" });
+    setActiveLane((lane) => (lane === "solana" ? null : lane));
   }, []);
+
+  const disconnect = useCallback(() => {
+    disconnectEvm();
+    disconnectSolana();
+  }, [disconnectEvm, disconnectSolana]);
 
   const executeCall = useCallback(
     async (data: Hex, target?: Address): Promise<void> => {
@@ -440,6 +467,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       connectSolana,
       selectLane: setActiveLane,
       disconnect,
+      disconnectEvm,
+      disconnectSolana,
       executeCall,
       resetTransaction: () => setTransaction({ status: "idle" }),
     }),
@@ -448,6 +477,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       connectEvm,
       connectSolana,
       disconnect,
+      disconnectEvm,
+      disconnectSolana,
       evmAddress,
       executeCall,
       solanaAddress,
